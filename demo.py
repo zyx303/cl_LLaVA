@@ -1,0 +1,2 @@
+from llava.constants import DEFAULT_IMAGE_TOKEN
+print(DEFAULT_IMAGE_TOKEN)
