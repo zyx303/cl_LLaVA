@@ -582,12 +582,14 @@ class Linear(nn.Linear, LoraLayer):
             x = x.to(self.lora_A[self.active_adapter].weight.dtype)
             x = self.lora_dropout[self.active_adapter](x)
 
-            result += (
-                self.lora_B[self.active_adapter](
-                    self.lora_A[self.active_adapter](x)
+            lora_a_shape = self.lora_A[self.active_adapter].weight.shape
+            if 0 not in lora_a_shape:
+                result += (
+                    self.lora_B[self.active_adapter](
+                        self.lora_A[self.active_adapter](x)
+                    )
+                    * self.scaling[self.active_adapter]
                 )
-                * self.scaling[self.active_adapter]
-            )
 
             # modified
             result += (
