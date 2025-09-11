@@ -6,7 +6,8 @@ import os
 def main():
     incremental_type = 'behavior_il'
     stream_seed = 1
-    model_path = 'liuhaotian/llava-v1.5-13b'  # 使用原始模型路径
+    model_path = 'model/llava/llava-v1.5-7b'  # 使用原始模型路径
+    type = 'low'
     
     if incremental_type == 'behavior_il':
         n_task = 7
@@ -14,36 +15,47 @@ def main():
         n_task = 4
     
     # 创建输出目录
-    output_dir = f'scripts/cl_{incremental_type}_seed{stream_seed}'
+    if type == 'high':
+        output_dir = f'scripts/cl_{incremental_type}_seed{stream_seed}'
+    else:
+        output_dir = f'scripts_low/cl_{incremental_type}_seed{stream_seed}'
     os.makedirs(output_dir, exist_ok=True)
+
+    if type == 'high':
+        checkpoints = 'checkpoints'
+    else:
+        checkpoints = 'checkpoint_low'
     
     # 生成持续学习脚本
-    script_lines = ["#!/bin/bash", ""]
-    
+    script_lines = ["#!/bin/bash", "set -x",'export CUDA_DEVICE_ORDER="PCI_BUS_ID"','export TRANSFORMERS_CACHE=/data/yongxi/.cache/huggingface']
+    cuda = "7"
     for i in range(n_task):
         # 数据路径
-        data_path = f'./data/{incremental_type}/stream_seed{stream_seed}/task{i}.json'
-        
+        if type=='high':
+            data_path = f'./data/{incremental_type}/stream_seed{stream_seed}/task{i}.json'
+        else:
+            data_path = f'./data_low/{incremental_type}/stream_seed{stream_seed}/task{i}.json'
+
         # 确定模型路径：第一个任务使用原始模型，后续任务使用前一个任务的输出
         if i == 0:
             current_model_path = model_path
         else:
-            current_model_path = f'./checkpoints/{incremental_type}_seed{stream_seed}_task{i-1}'
+            current_model_path = f'./{checkpoints}/{incremental_type}_seed{stream_seed}_task{i-1}'
         
         # 输出目录
-        current_output_dir = f'./checkpoints/{incremental_type}_seed{stream_seed}_task{i}'
+        current_output_dir = f'./{checkpoints}/{incremental_type}_seed{stream_seed}_task{i}'
         
         # 生成deepspeed命令
         script_lines.extend([
             f"echo 'Starting training for Task {i}...'",
-            f"deepspeed llava/train/train_mem.py \\",
+            f'deepspeed --include "localhost:{cuda}" llava/train/train_mem.py \\',
             f"    --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \\",
             f"    --deepspeed ./scripts/zero3.json \\",
             f"    --model_name_or_path {current_model_path} \\",
-            f"    --version v1 \\",
+            f"    --version v1.5 \\",
             f"    --data_path {data_path} \\",
-            f"    --image_folder ./data/{incremental_type}/images \\",
-            f"    --vision_tower openai/clip-vit-large-patch14-336 \\",
+            f"    --image_folder . \\",
+            f"    --vision_tower model/clip/clip-vit-large-patch14-336 \\",
             f"    --mm_projector_type mlp2x_gelu \\",
             f"    --mm_vision_select_layer -2 \\",
             f"    --mm_use_im_start_end False \\",
@@ -70,7 +82,7 @@ def main():
             f"    --gradient_checkpointing True \\",
             f"    --dataloader_num_workers 4 \\",
             f"    --lazy_preprocess True \\",
-            f"    --report_to wandb",
+            # f"    --report_to wandb",
             "",
             f"echo 'Task {i} training completed!'",
             ""

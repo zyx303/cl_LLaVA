@@ -46,14 +46,18 @@ def load_images(image_files):
         out.append(image)
     return out
 
-
+import debugpy
+import os
 def eval_model(args):
+    if os.getenv("debug"):
+        debugpy.listen(5678)
+        debugpy.wait_for_client()
     # Model
     disable_torch_init()
 
     model_name = get_model_name_from_path(args.model_path)
     tokenizer, model, image_processor, context_len = load_pretrained_model(
-        args.model_path, args.model_base, model_name
+        args.model_path, args.model_base, model_name,use_peft=True
     )
 
     qs = args.query
@@ -125,7 +129,9 @@ def eval_model(args):
         )
 
     outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
+    print('-'*20)
     print(outputs)
+    print('-'*20)
 
 
 if __name__ == "__main__":

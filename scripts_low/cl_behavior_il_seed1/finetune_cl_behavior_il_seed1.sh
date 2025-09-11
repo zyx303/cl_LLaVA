@@ -1,16 +1,14 @@
 #!/bin/bash
-export debug=1
 set -x
 export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TRANSFORMERS_CACHE=/data/yongxi/.cache/huggingface
-
 echo 'Starting training for Task 0...'
 deepspeed --include "localhost:7" llava/train/train_mem.py \
     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --deepspeed ./scripts/zero3.json \
     --model_name_or_path model/llava/llava-v1.5-7b \
     --version v1.5 \
-    --data_path ./data/behavior_il/stream_seed1/task0.json \
+    --data_path ./data_low/behavior_il/stream_seed1/task0.json \
     --image_folder . \
     --vision_tower model/clip/clip-vit-large-patch14-336 \
     --mm_projector_type mlp2x_gelu \
@@ -20,7 +18,7 @@ deepspeed --include "localhost:7" llava/train/train_mem.py \
     --image_aspect_ratio pad \
     --group_by_modality_length True \
     --bf16 True \
-    --output_dir ./checkpoints/behavior_il_seed1_task0 \
+    --output_dir ./checkpoint_low/behavior_il_seed1_task0 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 16 \
     --per_device_eval_batch_size 4 \
@@ -38,20 +36,20 @@ deepspeed --include "localhost:7" llava/train/train_mem.py \
     --model_max_length 2048 \
     --gradient_checkpointing True \
     --dataloader_num_workers 4 \
-    --lazy_preprocess True 
+    --lazy_preprocess True \
 
 echo 'Task 0 training completed!'
 
-# echo 'Waiting 5 seconds before next task...'
-# sleep 5
+echo 'Waiting 5 seconds before next task...'
+sleep 5
 
 # echo 'Starting training for Task 1...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task0 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task0 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task1.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task1.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -61,7 +59,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task1 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task1 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -79,7 +77,7 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 1 training completed!'
 
@@ -87,12 +85,12 @@ echo 'Task 0 training completed!'
 # sleep 5
 
 # echo 'Starting training for Task 2...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task1 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task1 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task2.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task2.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -102,7 +100,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task2 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task2 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -120,7 +118,7 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 2 training completed!'
 
@@ -128,12 +126,12 @@ echo 'Task 0 training completed!'
 # sleep 5
 
 # echo 'Starting training for Task 3...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task2 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task2 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task3.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task3.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -143,7 +141,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task3 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task3 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -161,7 +159,7 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 3 training completed!'
 
@@ -169,12 +167,12 @@ echo 'Task 0 training completed!'
 # sleep 5
 
 # echo 'Starting training for Task 4...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task3 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task3 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task4.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task4.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -184,7 +182,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task4 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task4 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -202,7 +200,7 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 4 training completed!'
 
@@ -210,12 +208,12 @@ echo 'Task 0 training completed!'
 # sleep 5
 
 # echo 'Starting training for Task 5...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task4 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task4 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task5.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task5.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -225,7 +223,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task5 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task5 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -243,7 +241,7 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 5 training completed!'
 
@@ -251,12 +249,12 @@ echo 'Task 0 training completed!'
 # sleep 5
 
 # echo 'Starting training for Task 6...'
-# deepspeed llava/train/train_mem.py \
+# deepspeed --include "localhost:7" llava/train/train_mem.py \
 #     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
 #     --deepspeed ./scripts/zero3.json \
-#     --model_name_or_path ./checkpoints/behavior_il_seed1_task5 \
+#     --model_name_or_path ./checkpoint_low/behavior_il_seed1_task5 \
 #     --version v1.5 \
-#     --data_path ./data/behavior_il/stream_seed1/task6.json \
+#     --data_path ./data_low/behavior_il/stream_seed1/task6.json \
 #     --image_folder . \
 #     --vision_tower model/clip/clip-vit-large-patch14-336 \
 #     --mm_projector_type mlp2x_gelu \
@@ -266,7 +264,7 @@ echo 'Task 0 training completed!'
 #     --image_aspect_ratio pad \
 #     --group_by_modality_length True \
 #     --bf16 True \
-#     --output_dir ./checkpoints/behavior_il_seed1_task6 \
+#     --output_dir ./checkpoint_low/behavior_il_seed1_task6 \
 #     --num_train_epochs 1 \
 #     --per_device_train_batch_size 16 \
 #     --per_device_eval_batch_size 4 \
@@ -284,6 +282,6 @@ echo 'Task 0 training completed!'
 #     --model_max_length 2048 \
 #     --gradient_checkpointing True \
 #     --dataloader_num_workers 4 \
-#     --lazy_preprocess True 
+#     --lazy_preprocess True \
 
 # echo 'Task 6 training completed!'

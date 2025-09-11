@@ -6,7 +6,8 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 import copy
-
+import constants
+classes = [0] + constants.OBJECTS + ['AppleSliced', 'ShowerCurtain', 'TomatoSliced', 'LettuceSliced', 'Lamp', 'ShowerHead', 'EggCracked', 'BreadSliced', 'PotatoSliced', 'Faucet']
 
 def load_task_json(args, task):
     """加载预处理的 JSON 数据"""
@@ -44,21 +45,38 @@ def prepare_data(args, task_data_list):
         # 获取任务描述和high_level_instr
         goal_desc = traj_data['turk_annotations']['anns'][repeat_idx]['task_desc']
         high_descs = traj_data['turk_annotations']['anns'][repeat_idx]['high_descs']
+        low_actions = traj_data['plan']['low_actions']
         image_infos = traj_data['images']
         
         # 为每个高级指令和对应图片创建训练样本
         id = 0
 
-        #find the high level instruction corresponding to the first image
+        #find the low level instruction corresponding to the first image
         for image_info in image_infos:
-            if image_info['high_idx'] == id:
+            if image_info['low_idx'] == id:
                 try:
-                    high_desc = high_descs[id]
+                    high_desc = high_descs[image_info['high_idx']]
                 except IndexError:
-                    print(task_data)
+                    # print(task_data)
                     print(f"IndexError: high_descs has length {len(high_descs)}, but trying to access index {id}. Skipping this entry.")
                     break
-
+                
+                try:
+                    low_action_info = low_actions[image_info['low_idx']]
+                    low_action = low_action_info['api_action']['action']
+                    if low_action in ['MoveAhead', 'LookUp', 'LookDown', 'RotateRight', 'RotateLeft']:
+                        label = None
+                    elif low_action == 'PutObject':
+                        label = low_action_info['api_action']['receptacleObjectId'].split('|')
+                    else:
+                        # print('low_action:', low_action)
+                        label = low_action_info['api_action']['objectId'].split('|')
+                    if label is not None:
+                        label = label[4].split('_')[0] if len(label) >= 5 else label[0]
+                except IndexError:
+                    # print(task_data)
+                    print(f"IndexError: low_actions has length {len(low_actions)}, but trying to access index {id}. Skipping this entry.")
+                    break
                 # 构建图片路径
                 image_path = get_image_path(
                     image_info['image_name'],
@@ -66,17 +84,32 @@ def prepare_data(args, task_data_list):
                     traj_data['split'],
                     traj_data['root']
                 )
+                if label is None:
+                    ref = low_action
+                else:
+                    ref = f"{low_action} {label}"
                 
-                
+            #     "low_actions": [
+                # {
+                #     "api_action": {
+                #         "action": "LookDown",
+                #         "forceAction": true
+                #     },
+                #     "discrete_action": {
+                #         "action": "LookDown_15",
+                #         "args": {}
+                #     },
+                #     "high_idx": 0
+                # },
                 # 构建对话格式
                 conversation = [
                     {
                         "from": "human",
-                        "value": f"<image>\nGiven the goal: {goal_desc}\nWhat is the next high-level action to take?"
+                        "value": f"<image>\nAccording to the image, Given the goal: {goal_desc}\nThe high-level instruction is {high_desc}, what is the next low-level action to take?\nAvailable low-level actions: ['MoveAhead','RotateLeft','RotateRight','LookUp','LookDown','PickupObject','HeatObject','PutObject','OpenObject','CloseObject','ToggleObjectOn','ToggleObjectOff']. Please exactly output one of them as your answer. If the action is in ['PickupObject','PutObject','OpenObject','CloseObject','ToggleObjectOn'] please also give the label right after the action."
                     },
                     {
                         "from": "gpt", 
-                        "value": high_desc
+                        "value": ref
                     }
                 ]
                 
@@ -96,7 +129,7 @@ def main():
     parser.add_argument('--pp_folder', type=str, default='pp', help='Preprocessed folder name')
     parser.add_argument('--data', type=str, default='data/json_feat_2.1.0', help='Dataset directory')
     parser.add_argument('--incremental_setup', type=str, default='behavior_il', choices=['behavior_il', 'behavior_il_test', 'environment_il'])
-    parser.add_argument('--output', type=str, default='/data/yongxi/high_instr')
+    parser.add_argument('--output', type=str, default='./data_low')
     args = parser.parse_args()
 
     if args.incremental_setup in ['behavior_il','behavior_il_test']:

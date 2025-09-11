@@ -11,6 +11,8 @@ dist
 *.jsonl
 
 # Data
+data
+data_low
 !**/alpaca-data-conversation.json
 
 # Editor
@@ -33,3 +35,5 @@ ckpts*
 
 # Demo
 serve_images/
+data/preprocess.py
+data/json_feat_2.1.0/pp.vocab
