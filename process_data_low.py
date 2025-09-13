@@ -105,7 +105,7 @@ def prepare_data(args, task_data_list):
                 conversation = [
                     {
                         "from": "human",
-                        "value": f"<image>\nAccording to the image, Given the goal: {goal_desc}\nThe high-level instruction is {high_desc}, what is the next low-level action to take?\nAvailable low-level actions: ['MoveAhead','RotateLeft','RotateRight','LookUp','LookDown','PickupObject','HeatObject','PutObject','OpenObject','CloseObject','ToggleObjectOn','ToggleObjectOff']. Please exactly output one of them as your answer. If the action is in ['PickupObject','PutObject','OpenObject','CloseObject','ToggleObjectOn'] please also give the label right after the action."
+                        "value": f'<image>\nAccording to the image, Given the goal: "{goal_desc}"\nThe high-level instruction is "{high_desc}", what is the next low-level action to take?\nAvailable low-level actions: ["MoveAhead","RotateLeft","RotateRight","LookUp","LookDown","PickupObject","HeatObject","PutObject","OpenObject","CloseObject","ToggleObjectOn","ToggleObjectOff"]. Please exactly output one of them as your answer. If the action is in ["PickupObject","PutObject","OpenObject","CloseObject","ToggleObjectOn"] please also give the label right after the action.'
                     },
                     {
                         "from": "gpt", 

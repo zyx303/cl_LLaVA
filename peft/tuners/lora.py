@@ -458,8 +458,9 @@ class LoraLayer:
         if r > 0:
             self.loranew_A.update(nn.ModuleDict({adapter_name: nn.Linear(self.in_features, r, bias=False)})) # modified
             self.loranew_B.update(nn.ModuleDict({adapter_name: nn.Linear(r, self.out_features, bias=False)})) # modified
-            self.lora_A.update(nn.ModuleDict({adapter_name: nn.Linear(self.in_features, r_sum, bias=False)})) # modified
-            self.lora_B.update(nn.ModuleDict({adapter_name: nn.Linear(r_sum, self.out_features, bias=False)})) # modified
+            if r_sum!=0:
+                self.lora_A.update(nn.ModuleDict({adapter_name: nn.Linear(self.in_features, r_sum, bias=False)})) # modified
+                self.lora_B.update(nn.ModuleDict({adapter_name: nn.Linear(r_sum, self.out_features, bias=False)})) # modified
             self.scaling[adapter_name] = lora_alpha / r
         if init_lora_weights:
             self.reset_lora_parameters(adapter_name)

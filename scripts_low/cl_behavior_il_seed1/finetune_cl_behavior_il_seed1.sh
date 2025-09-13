@@ -1,9 +1,8 @@
 #!/bin/bash
 set -x
-export CUDA_DEVICE_ORDER="PCI_BUS_ID"
 export TRANSFORMERS_CACHE=/data/yongxi/.cache/huggingface
 echo 'Starting training for Task 0...'
-deepspeed --include "localhost:7" llava/train/train_mem.py \
+deepspeed --include "localhost:6,7" llava/train/train_mem.py \
     --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
     --deepspeed ./scripts/zero3.json \
     --model_name_or_path model/llava/llava-v1.5-7b \
@@ -20,7 +19,7 @@ deepspeed --include "localhost:7" llava/train/train_mem.py \
     --bf16 True \
     --output_dir ./checkpoint_low/behavior_il_seed1_task0 \
     --num_train_epochs 1 \
-    --per_device_train_batch_size 16 \
+    --per_device_train_batch_size 8 \
     --per_device_eval_batch_size 4 \
     --gradient_accumulation_steps 1 \
     --evaluation_strategy "no" \

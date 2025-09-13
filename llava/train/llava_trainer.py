@@ -191,6 +191,10 @@ class LLaVATrainer(Trainer):
                         "weight_decay": 0.0,
                         "lr": self.args.mm_projector_lr,
                     },
+                    {
+                        "params": [p for n, p in opt_model.named_parameters() if not p.requires_grad],
+                        "lr": 0.0,  # 关键点：为冻结参数设置学习率为0
+                    },
                 ]
             else:
                 optimizer_grouped_parameters = [
@@ -205,6 +209,10 @@ class LLaVATrainer(Trainer):
                             p for n, p in opt_model.named_parameters() if (n not in decay_parameters and p.requires_grad)
                         ],
                         "weight_decay": 0.0,
+                    },
+                    {
+                        "params": [p for n, p in opt_model.named_parameters() if not p.requires_grad],
+                        "lr": 0.0,  # 关键点：为冻结参数设置学习率为0
                     },
                 ]
 
