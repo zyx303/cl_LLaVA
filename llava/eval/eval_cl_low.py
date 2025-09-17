@@ -257,7 +257,7 @@ def main():
     parser.add_argument("--model-path", type=str, required=True)
     parser.add_argument("--model-base", type=str, default=None)
     parser.add_argument("--data", default='./data',type=str, required=True, help="JSONL or JSON; each item has id, image, conversations")
-    parser.add_argument('--splits',default='valid_seen', type=str, help='which split to eval')
+    parser.add_argument('--splits',default='valid_unseen', type=str, help='which split to eval')
     parser.add_argument('--incremental_setup', type=str, required=True, help='which incremental learning setup to eval')
     parser.add_argument("--stream_seed", type=int, required=True, help='which stream seed to eval')
     parser.add_argument("--incremental_task", type=int, required=True, help='which incremental task to eval')
