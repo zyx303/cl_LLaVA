@@ -186,7 +186,7 @@ def evaluate(args):
         #         qs = image_token_se + "\n" + qs
         #     else:
         #         qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
-        conv_mode = "llava_v1"
+        conv_mode = "v1"
         qs = prompt_raw
         conv = conv_templates[conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
